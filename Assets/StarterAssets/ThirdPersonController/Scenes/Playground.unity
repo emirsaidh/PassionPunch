@@ -440,7 +440,6 @@ MonoBehaviour:
   aimColliderLayerMask:
     serializedVersion: 2
     m_Bits: 1
-  debugTransform: {fileID: 738085086}
   pfBulletProjectile: {fileID: 3652965178284162087, guid: ed6996d9e8c7e419090abd87d0e2c793, type: 3}
   bulletSpawnPoint: {fileID: 272236695}
 --- !u!1 &738085082
@@ -460,7 +459,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &738085084
 MeshRenderer:
   m_ObjectHideFlags: 0
