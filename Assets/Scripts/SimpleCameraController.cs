@@ -10,52 +10,52 @@ namespace UnityTemplateProjects
     {
         class CameraState
         {
-            public float yaw;
-            public float pitch;
-            public float roll;
-            public float x;
-            public float y;
-            public float z;
+            public float Yaw;
+            public float Pitch;
+            public float Roll;
+            public float X;
+            public float Y;
+            public float Z;
 
             public void SetFromTransform(Transform t)
             {
-                pitch = t.eulerAngles.x;
-                yaw = t.eulerAngles.y;
-                roll = t.eulerAngles.z;
-                x = t.position.x;
-                y = t.position.y;
-                z = t.position.z;
+                Pitch = t.eulerAngles.x;
+                Yaw = t.eulerAngles.y;
+                Roll = t.eulerAngles.z;
+                X = t.position.x;
+                Y = t.position.y;
+                Z = t.position.z;
             }
 
             public void Translate(Vector3 translation)
             {
-                Vector3 rotatedTranslation = Quaternion.Euler(pitch, yaw, roll) * translation;
+                Vector3 rotatedTranslation = Quaternion.Euler(Pitch, Yaw, Roll) * translation;
 
-                x += rotatedTranslation.x;
-                y += rotatedTranslation.y;
-                z += rotatedTranslation.z;
+                X += rotatedTranslation.x;
+                Y += rotatedTranslation.y;
+                Z += rotatedTranslation.z;
             }
 
             public void LerpTowards(CameraState target, float positionLerpPct, float rotationLerpPct)
             {
-                yaw = Mathf.Lerp(yaw, target.yaw, rotationLerpPct);
-                pitch = Mathf.Lerp(pitch, target.pitch, rotationLerpPct);
-                roll = Mathf.Lerp(roll, target.roll, rotationLerpPct);
+                Yaw = Mathf.Lerp(Yaw, target.Yaw, rotationLerpPct);
+                Pitch = Mathf.Lerp(Pitch, target.Pitch, rotationLerpPct);
+                Roll = Mathf.Lerp(Roll, target.Roll, rotationLerpPct);
                 
-                x = Mathf.Lerp(x, target.x, positionLerpPct);
-                y = Mathf.Lerp(y, target.y, positionLerpPct);
-                z = Mathf.Lerp(z, target.z, positionLerpPct);
+                X = Mathf.Lerp(X, target.X, positionLerpPct);
+                Y = Mathf.Lerp(Y, target.Y, positionLerpPct);
+                Z = Mathf.Lerp(Z, target.Z, positionLerpPct);
             }
 
             public void UpdateTransform(Transform t)
             {
-                t.eulerAngles = new Vector3(pitch, yaw, roll);
-                t.position = new Vector3(x, y, z);
+                t.eulerAngles = new Vector3(Pitch, Yaw, Roll);
+                t.position = new Vector3(X, Y, Z);
             }
         }
         
-        CameraState m_TargetCameraState = new CameraState();
-        CameraState m_InterpolatingCameraState = new CameraState();
+        CameraState _mTargetCameraState = new CameraState();
+        CameraState _mInterpolatingCameraState = new CameraState();
 
         [Header("Movement Settings")]
         [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
@@ -75,23 +75,23 @@ namespace UnityTemplateProjects
         public bool invertY = false;
 
 #if ENABLE_INPUT_SYSTEM
-        InputAction movementAction;
-        InputAction verticalMovementAction;
-        InputAction lookAction;
-        InputAction boostFactorAction;
-        bool        mouseRightButtonPressed;
+        InputAction _movementAction;
+        InputAction _verticalMovementAction;
+        InputAction _lookAction;
+        InputAction _boostFactorAction;
+        bool        _mouseRightButtonPressed;
 
         void Start()
         {
             var map = new InputActionMap("Simple Camera Controller");
 
-            lookAction = map.AddAction("look", binding: "<Mouse>/delta");
-            movementAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
-            verticalMovementAction = map.AddAction("Vertical Movement");
-            boostFactorAction = map.AddAction("Boost Factor", binding: "<Mouse>/scroll");
+            _lookAction = map.AddAction("look", binding: "<Mouse>/delta");
+            _movementAction = map.AddAction("move", binding: "<Gamepad>/leftStick");
+            _verticalMovementAction = map.AddAction("Vertical Movement");
+            _boostFactorAction = map.AddAction("Boost Factor", binding: "<Mouse>/scroll");
 
-            lookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
-            movementAction.AddCompositeBinding("Dpad")
+            _lookAction.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=15, y=15)");
+            _movementAction.AddCompositeBinding("Dpad")
                 .With("Up", "<Keyboard>/w")
                 .With("Up", "<Keyboard>/upArrow")
                 .With("Down", "<Keyboard>/s")
@@ -100,36 +100,36 @@ namespace UnityTemplateProjects
                 .With("Left", "<Keyboard>/leftArrow")
                 .With("Right", "<Keyboard>/d")
                 .With("Right", "<Keyboard>/rightArrow");
-            verticalMovementAction.AddCompositeBinding("Dpad")
+            _verticalMovementAction.AddCompositeBinding("Dpad")
                 .With("Up", "<Keyboard>/pageUp")
                 .With("Down", "<Keyboard>/pageDown")
                 .With("Up", "<Keyboard>/e")
                 .With("Down", "<Keyboard>/q")
                 .With("Up", "<Gamepad>/rightshoulder")
                 .With("Down", "<Gamepad>/leftshoulder");
-            boostFactorAction.AddBinding("<Gamepad>/Dpad").WithProcessor("scaleVector2(x=1, y=4)");
+            _boostFactorAction.AddBinding("<Gamepad>/Dpad").WithProcessor("scaleVector2(x=1, y=4)");
 
-            movementAction.Enable();
-            lookAction.Enable();
-            verticalMovementAction.Enable();
-            boostFactorAction.Enable();
+            _movementAction.Enable();
+            _lookAction.Enable();
+            _verticalMovementAction.Enable();
+            _boostFactorAction.Enable();
         }
 #endif
 
         void OnEnable()
         {
-            m_TargetCameraState.SetFromTransform(transform);
-            m_InterpolatingCameraState.SetFromTransform(transform);
+            _mTargetCameraState.SetFromTransform(transform);
+            _mInterpolatingCameraState.SetFromTransform(transform);
         }
 
         Vector3 GetInputTranslationDirection()
         {
             Vector3 direction = Vector3.zero;
 #if ENABLE_INPUT_SYSTEM
-            var moveDelta = movementAction.ReadValue<Vector2>();
+            var moveDelta = _movementAction.ReadValue<Vector2>();
             direction.x = moveDelta.x;
             direction.z = moveDelta.y;
-            direction.y = verticalMovementAction.ReadValue<Vector2>().y;
+            direction.y = _verticalMovementAction.ReadValue<Vector2>().y;
 #else
             if (Input.GetKey(KeyCode.W))
             {
@@ -193,8 +193,8 @@ namespace UnityTemplateProjects
                 
                 var mouseSensitivityFactor = mouseSensitivityCurve.Evaluate(mouseMovement.magnitude);
 
-                m_TargetCameraState.yaw += mouseMovement.x * mouseSensitivityFactor;
-                m_TargetCameraState.pitch += mouseMovement.y * mouseSensitivityFactor;
+                _mTargetCameraState.Yaw += mouseMovement.x * mouseSensitivityFactor;
+                _mTargetCameraState.Pitch += mouseMovement.y * mouseSensitivityFactor;
             }
             
             // Translation
@@ -210,21 +210,21 @@ namespace UnityTemplateProjects
             boost += GetBoostFactor();
             translation *= Mathf.Pow(2.0f, boost);
 
-            m_TargetCameraState.Translate(translation);
+            _mTargetCameraState.Translate(translation);
 
             // Framerate-independent interpolation
             // Calculate the lerp amount, such that we get 99% of the way to our target in the specified time
             var positionLerpPct = 1f - Mathf.Exp((Mathf.Log(1f - 0.99f) / positionLerpTime) * Time.deltaTime);
             var rotationLerpPct = 1f - Mathf.Exp((Mathf.Log(1f - 0.99f) / rotationLerpTime) * Time.deltaTime);
-            m_InterpolatingCameraState.LerpTowards(m_TargetCameraState, positionLerpPct, rotationLerpPct);
+            _mInterpolatingCameraState.LerpTowards(_mTargetCameraState, positionLerpPct, rotationLerpPct);
 
-            m_InterpolatingCameraState.UpdateTransform(transform);
+            _mInterpolatingCameraState.UpdateTransform(transform);
         }
 
         float GetBoostFactor()
         {
 #if ENABLE_INPUT_SYSTEM
-            return boostFactorAction.ReadValue<Vector2>().y * 0.01f;
+            return _boostFactorAction.ReadValue<Vector2>().y * 0.01f;
 #else
             return Input.mouseScrollDelta.y * 0.2f;
 #endif
@@ -233,7 +233,7 @@ namespace UnityTemplateProjects
         Vector2 GetInputLookRotation()
         {
 #if ENABLE_INPUT_SYSTEM
-            return lookAction.ReadValue<Vector2>();
+            return _lookAction.ReadValue<Vector2>();
 #else
             return new Vector2(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y")) * 10;
 #endif

@@ -1,9 +1,5 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 public class BulletProjectile : MonoBehaviour
 {
@@ -11,44 +7,41 @@ public class BulletProjectile : MonoBehaviour
     [SerializeField] private Material yellowMaterial;
     [SerializeField] private Material redMaterial;
     private Rigidbody _bulletRigidBody;
+    private float _speed = 40f;
     
 
 
     private void Awake()
     {
         _bulletRigidBody = GetComponent<Rigidbody>();
-        
-        if (GameManager.Instance.redBullet)
-        {
-            GetComponentInChildren<MeshRenderer>().material = redMaterial;
-        }
-        else
-        {
-            GetComponentInChildren<MeshRenderer>().material = yellowMaterial;
-        }
+        //Change material if red bullet option selected
+        GetComponentInChildren<MeshRenderer>().material = GameManager.Instance.redBullet ? redMaterial : yellowMaterial;
     }
 
     private void Start()
     {
+        //Start coroutine if one second bullet option selected
         if (GameManager.Instance.oneSecBullet)
         {
             StartCoroutine(destroyOneSec());
         }
-
-        
-        
-        float speed = 40f;
-        _bulletRigidBody.velocity = transform.forward * speed;
+        _bulletRigidBody.velocity = transform.forward * _speed;
     }
     
-    private void OnCollisionEnter(Collision other)
+    //Used both onCollision and OnTrigger for handle not colliding objects in scene
+    private void OnCollisionEnter()
+    {
+        Instantiate(vfxHitGreen, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+    }
+    private void OnTriggerEnter()
     {
         Instantiate(vfxHitGreen, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
 
     private IEnumerator destroyOneSec() {
-        yield return new WaitForSecondsRealtime(0.1f); //Wait 1 second
+        yield return new WaitForSecondsRealtime(1); //Wait 1 second
         Instantiate(vfxHitGreen, transform.position, Quaternion.identity);
         Destroy(gameObject);
     }

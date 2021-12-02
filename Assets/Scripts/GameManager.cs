@@ -6,17 +6,13 @@ public class GameManager : MonoBehaviour
 {
     
     private static GameManager _instance;
-
-
     public static GameManager Instance => _instance;
 
-
-
     [SerializeField] private GameObject menuPanel;
-    public bool oneSecBullet = false;
-    public bool bigBullet = false;
-    public bool redBullet = false;
-    public bool _isMenuActive = false;
+    public bool oneSecBullet;
+    public bool bigBullet;
+    public bool redBullet;
+    [FormerlySerializedAs("_isMenuActive")] public bool isMenuActive;
     [SerializeField] private Button oneSecButton;
     [SerializeField] private Button bigBulletButton;
     [SerializeField] private Button redBulletButton;
@@ -36,14 +32,14 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.M))
         {
-            if (!_isMenuActive)
+            if (!isMenuActive)
             {
-                _isMenuActive = true;
+                isMenuActive = true;
                 OpenMenu();    
             }
             else
             {
-                _isMenuActive = false;
+                isMenuActive = false;
                CloseMenu(); 
             }
         }
@@ -51,7 +47,9 @@ public class GameManager : MonoBehaviour
 
     private void OpenMenu()
     {
-        Cursor.lockState = CursorLockMode.Confined;
+        //TimeScale=0 only stops physics engine so we need to change cursor state and keep a boolean for
+        //isMenu active to check and stop instantiating bullets when menu is active
+        Cursor.lockState = CursorLockMode.Confined; 
         menuPanel.SetActive(true);
         Time.timeScale = 0;
     }
