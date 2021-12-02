@@ -18,7 +18,7 @@ public class TpsShooter : MonoBehaviour
     //[SerializeField] private Transform debugTransform;
     [SerializeField] private Transform pfBulletProjectile;
     [SerializeField] private Transform pfBigBullet;
-    [SerializeField] private Transform bulletSpawnPoint;
+    [SerializeField] private Transform[] bulletSpawnPoints = new Transform [5];
     [SerializeField] private Text numberOfBulletsText;
 
     private ThirdPersonController _thirdPersonController;
@@ -26,8 +26,8 @@ public class TpsShooter : MonoBehaviour
     private Animator _animator;
     private int _numberOfBullets;
     private int _lastShootBullets;
-    //private Vector3[] _randomPelletDirections = new Vector3 [6];
-    //private float _pelletInaccuracy = 4f;
+    private Vector3[] _randomPelletDirections = new Vector3 [5];
+    private float _pelletInaccuracy = 0.2f;
     
 
     private void Awake()
@@ -76,25 +76,33 @@ public class TpsShooter : MonoBehaviour
             
             _numberOfBullets++;
             numberOfBulletsText.text =
-                "BULLETS \n Total: " + _numberOfBullets * 6 + "\n Last shoot: 6";
-            Vector3 aimDir = (mouseWorldPosition - bulletSpawnPoint.position).normalized;
-            //GenerateRandomPellets();
-            Instantiate(GameManager.Instance.bigBullet ? pfBigBullet : pfBulletProjectile, bulletSpawnPoint.position,
-                    Quaternion.LookRotation(aimDir, Vector3.up));
+                "BULLETS \n Total: " + _numberOfBullets * 5 + "\n Last Shoot \n (Pellets): 5";
+            Vector3 aimDir = (mouseWorldPosition - bulletSpawnPoints[0].position).normalized;
+            //Vector3 testDir = new Vector3(1f, 0f, 2f);
+            GenerateRandomPellets(aimDir);
+            for (int i = 0; i < _randomPelletDirections.Length; i++)
+            {
+                Instantiate(GameManager.Instance.bigBullet ? pfBigBullet : pfBulletProjectile, bulletSpawnPoints[i].position,
+                    Quaternion.LookRotation(_randomPelletDirections[i], Vector3.up));
+            }
+            
+            
             _starterAssetsInputs.shoot = false;
 
         }
         
     }
 
-    /*public void GenerateRandomPellets()
+    public void GenerateRandomPellets(Vector3 aimDir)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < _randomPelletDirections.Length; i++)
         {
-            var position = new Vector3(Random.Range(-_pelletInaccuracy, _pelletInaccuracy),Random.Range(-_pelletInaccuracy, _pelletInaccuracy), Random.Range(-_pelletInaccuracy, _pelletInaccuracy));
+            var position = new Vector3( aimDir.x + Random.Range(-_pelletInaccuracy,_pelletInaccuracy),aimDir.y + Random.Range(-_pelletInaccuracy,_pelletInaccuracy),
+                aimDir.z + Random.Range(-_pelletInaccuracy,_pelletInaccuracy)).normalized;
+            //Random.Range(-_pelletInaccuracy,_pelletInaccuracy)
             _randomPelletDirections[i] = position;
         }
-        
-    }*/
+            
+    }
     
 }
