@@ -171,3 +171,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vfxHitGreen: {fileID: 613433886817584985, guid: 6e845b0e80fad2d4c93ff505a0750129, type: 3}
+  yellowMaterial: {fileID: 2100000, guid: 33ba0c53d763ce449a6c35c00dca0b9a, type: 2}
+  redMaterial: {fileID: 2100000, guid: 465e10759de59204f8e57f902444d809, type: 2}

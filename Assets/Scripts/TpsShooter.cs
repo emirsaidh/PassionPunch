@@ -6,6 +6,8 @@ using Cinemachine;
 using StarterAssets;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class TpsShooter : MonoBehaviour
 {
@@ -15,17 +17,24 @@ public class TpsShooter : MonoBehaviour
     [SerializeField] private LayerMask aimColliderLayerMask = new LayerMask();
     //[SerializeField] private Transform debugTransform;
     [SerializeField] private Transform pfBulletProjectile;
+    [SerializeField] private Transform pfBigBullet;
     [SerializeField] private Transform bulletSpawnPoint;
+    [SerializeField] private Text numberOfBulletsText;
 
     private ThirdPersonController _thirdPersonController;
     private StarterAssetsInputs _starterAssetsInputs;
-    private Animator animator;
+    private Animator _animator;
+    private int _numberOfBullets;
+    private int _lastShootBullets;
+    //private Vector3[] _randomPelletDirections = new Vector3 [6];
+    //private float _pelletInaccuracy = 4f;
+    
 
     private void Awake()
     {
         _thirdPersonController = GetComponent<ThirdPersonController>();
         _starterAssetsInputs = GetComponent<StarterAssetsInputs>();
-        animator = GetComponent<Animator>();
+        _animator = GetComponent<Animator>();
 
     }
 
@@ -40,12 +49,12 @@ public class TpsShooter : MonoBehaviour
             mouseWorldPosition = raycastHit.point;
         }
         
-        if (_starterAssetsInputs.aim)
+        if (_starterAssetsInputs.aim && !GameManager.Instance._isMenuActive)
         {
             aimVirtualCamera.gameObject.SetActive(true);
             _thirdPersonController.SetSensitivity(aimSensitivity);
             _thirdPersonController.SetRotateOnMove(false);
-            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
+            _animator.SetLayerWeight(1, Mathf.Lerp(_animator.GetLayerWeight(1), 1f, Time.deltaTime * 10f));
             
 
             Vector3 worldAimTarget = mouseWorldPosition;
@@ -59,16 +68,33 @@ public class TpsShooter : MonoBehaviour
             aimVirtualCamera.gameObject.SetActive(false);
             _thirdPersonController.SetSensitivity(normalSensitivity);
             _thirdPersonController.SetRotateOnMove(true);
-            animator.SetLayerWeight(1, Mathf.Lerp(animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
+            _animator.SetLayerWeight(1, Mathf.Lerp(_animator.GetLayerWeight(1), 0f, Time.deltaTime * 10f));
         }
 
-        if (_starterAssetsInputs.shoot)
+        if (_starterAssetsInputs.shoot && !GameManager.Instance._isMenuActive)
         {
+            
+            _numberOfBullets++;
+            numberOfBulletsText.text =
+                "BULLETS \n Total: " + _numberOfBullets * 6 + "\n Last shoot: 6";
             Vector3 aimDir = (mouseWorldPosition - bulletSpawnPoint.position).normalized;
-            Instantiate(pfBulletProjectile, bulletSpawnPoint.position, Quaternion.LookRotation(aimDir, Vector3.up));
+            //GenerateRandomPellets();
+            Instantiate(GameManager.Instance.bigBullet ? pfBigBullet : pfBulletProjectile, bulletSpawnPoint.position,
+                    Quaternion.LookRotation(aimDir, Vector3.up));
             _starterAssetsInputs.shoot = false;
 
         }
         
     }
+
+    /*public void GenerateRandomPellets()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            var position = new Vector3(Random.Range(-_pelletInaccuracy, _pelletInaccuracy),Random.Range(-_pelletInaccuracy, _pelletInaccuracy), Random.Range(-_pelletInaccuracy, _pelletInaccuracy));
+            _randomPelletDirections[i] = position;
+        }
+        
+    }*/
+    
 }
